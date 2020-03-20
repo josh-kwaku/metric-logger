@@ -1,19 +1,13 @@
-import { HttpStatusCode } from './http_status_codes';
+import logger from "./logger";
+import { AppError } from './error';
 
-export class AppError extends Error {
-    public readonly name: string;
-    public readonly httpCode: HttpStatusCode;
-    public readonly isOperational: boolean;
-  
-    constructor(name: string, httpCode: HttpStatusCode, description: string, isOperational: boolean) {
-      super(description);
-  
-      Object.setPrototypeOf(this, new.target.prototype); // restore prototype chain
-  
-      this.name = name;
-      this.httpCode = httpCode;
-      this.isOperational = isOperational;
-  
-      Error.captureStackTrace(this);
+export class ErrorHandler {
+    public async handleError(error: AppError): Promise<any> {
+        // add logger here
+        logger.error(error);
+
+        if(!error.isOperational) { // restart the server whenever a programming error occurs
+            process.exit(1);
+        }
     }
 }
