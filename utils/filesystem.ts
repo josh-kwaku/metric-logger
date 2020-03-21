@@ -16,7 +16,7 @@ export class FileSystem {
     public readFile(filepath: string, callback: ICallback) {
         fs.readFile(filepath, (err, data) => {
             if (err) callback(err, null)
-            callback(null, data.toString())
+            else callback(null, data.toString())
         })
     }
 
@@ -24,6 +24,3 @@ export class FileSystem {
         return file_contents.split("\n");
     }
 }
-
-let y = new FileSystem();
-y.splitLines('./logger.js');

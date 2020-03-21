@@ -102,12 +102,13 @@ export class MetricService {
         return new Promise((resolve, reject) => {
             fileSystem.readFile(pathToMetricFile + `${key}.txt`, (err, file_contents) => {
                 if (err) {
-                    let error = new AppError(err.message, HttpStatusCode.INTERNAL_SERVER_ERROR, CommonErrors.SERVER_ERROR, true);
+                    let error = new AppError(err.message, HttpStatusCode.BAD_REQUEST, 
+                    CommonErrors.BAD_PARAMETERS, true);
     
                     errorHandler.handleError(error);
-                    reject(error);   
+                    reject(error);    
                 }
-                resolve(fileSystem.splitLines(file_contents));
+                else resolve(fileSystem.splitLines(file_contents));
             });
         });
     }

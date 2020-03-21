@@ -24,7 +24,7 @@ export class MetricController {
                 }
                 reject(response);
             }
-            metricService.writeMetricToFile(requestObject).then((isSuccess: boolean) => {
+            else metricService.writeMetricToFile(requestObject).then((isSuccess: boolean) => {
                 let response: IResponse = {
                     httpCode: HttpStatusCode.OK
                 }
