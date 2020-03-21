@@ -15,8 +15,6 @@ app.use(bodyParser.json());
 
 let logDirectory = path.join(process.cwd(), 'httplogs');
 
-console.log(path.join(process.cwd(), 'httplogs'));
-
 fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory);
 
 // create a rotating write stream

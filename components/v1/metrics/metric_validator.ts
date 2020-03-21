@@ -7,7 +7,6 @@ export class MetricValidator {
             key: Joi.string()
         });
         const result = schema.validate(payload);
-        console.log(result);
         return result.error === undefined ? true : false
     }
 }

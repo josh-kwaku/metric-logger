@@ -1,4 +1,4 @@
-import express from "express";
+import express, { response } from "express";
 import { NextFunction } from "connect";
 import { ParamsDictionary, Request, Response } from "express-serve-static-core";
 import { MetricController } from './metric_controller';
@@ -10,11 +10,15 @@ const router = express.Router();
 
 const addParamToReqBody = function(req: Request<ParamsDictionary, any, any>, res: Response<any>, next:NextFunction) {
     for (let [key, value] of Object.entries(req.params)) {
-        // if (Number(value) !== NaN) next(); // don't allow numeric keys
         req.body[key] = value;
     }
-    console.log("req body: ", req.body);
     next();
+}
+
+const handleResponse =  function(response: IResponse, res: Response<any>, sendBody: boolean) {
+    let resp = Object.assign({}, response);
+    delete resp.httpCode;
+    sendBody ? res.status(response.httpCode).send(resp) : res.status(response.httpCode).send()
 }
 
 router.get('/', (req, res) => {
@@ -22,18 +26,19 @@ router.get('/', (req, res) => {
 })
 
 router.post('/:key', addParamToReqBody, (req, res) => {
-   metricController.saveMetric(req.body).then((response: IResponse) => {
-       console.log("got here");
-       res.status(response.httpCode).send();  
+   metricController.saveMetric(req.body).then((result: IResponse) => {
+       handleResponse(result, res, false)
    }).catch((error: IResponse) => {
-       let err = Object.assign({}, error);
-       delete err.httpCode;
-       res.status(error.httpCode).send(err);
+       handleResponse(error, res, true);
    })
 });
 
 router.get('/:key/sum', (req, res) => {
-    res.status(200).send({sum: 0});
+    metricController.sumMetricByKey(req.params.key).then((result: IResponse) => {
+        handleResponse(result, res, true)
+    }).catch((error: IResponse) => {
+        handleResponse(error, res, true);
+    }) 
 });
 
 export default router;

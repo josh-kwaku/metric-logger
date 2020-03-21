@@ -41,8 +41,27 @@ export class MetricController {
         })
     }
 
-    public sumMetricByKey() {
-
+    public sumMetricByKey(key: string): Promise<any> {
+        return new Promise((resolve, reject) => {
+            metricService.sumMetricByKey(key).then(sum => {
+                let response: IResponse = {
+                    httpCode: HttpStatusCode.OK,
+                    data: {
+                        value: sum
+                    },
+                    success: true
+                }
+                resolve(response);
+            }).catch((error: AppError) => {
+                let response: IResponse = {
+                    success: false,
+                    message: error.message,
+                    httpCode: error.httpCode,
+                    data: {}
+                }
+                reject(response);
+            })
+        })
     }
 }
 

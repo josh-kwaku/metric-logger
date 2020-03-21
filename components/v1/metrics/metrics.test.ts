@@ -22,7 +22,6 @@ describe('Metric Logging Service', () => {
                 .post('/api/v1/metric/900')
                 .send({value: 8})
                 .end((err, res) => {
-                    console.log(err)
                     res.status.should.equal(400);
                     res.body.success.should.equal(false);
                     done();
