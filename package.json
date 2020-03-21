@@ -1,7 +1,7 @@
 {
   "name": "metric_logger",
   "version": "1.0.0",
-  "description": "",
+  "description": "A simple rest api that that sums metrics by time window for the most recent hour.",
   "main": "index.js",
   "scripts": {
     "build": "npm run build-ts && npm run lint",
@@ -12,8 +12,10 @@
     "serve-debug": "nodemon --inspect dist/server.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Joshua Boateng",
+  "homepage": "https://github.com/Jake-parkers/metric-logger",
   "license": "ISC",
+  "engines": { "node" : ">=10.3 < 12.13.0" },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
     "@types/body-parser": "^1.19.0",

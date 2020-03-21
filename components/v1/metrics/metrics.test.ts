@@ -4,9 +4,6 @@ import request from "supertest";
 import app from '../../app';
 chai.use(chaiHttp);
 
-
-// const server = supertest.agent('http://localhost:3000/api/v1')
-
 describe('Metric Logging Service', () => {
     describe("Add new metric", () => {
         it('when no key is provided, then it should return and a 404 error', () =>{
