@@ -1,5 +1,8 @@
 import { HttpStatusCode } from './http_status_codes';
 
+/**
+ * Custom Error Object
+ */
 export class AppError extends Error {
     public readonly name: string;
     public readonly httpCode: HttpStatusCode;

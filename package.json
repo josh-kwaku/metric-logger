@@ -15,7 +15,9 @@
   "author": "Joshua Boateng",
   "homepage": "https://github.com/Jake-parkers/metric-logger",
   "license": "ISC",
-  "engines": { "node" : ">=10.3 < 12.13.0" },
+  "engines": {
+    "node": ">=10.3 < 12.13.0"
+  },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
     "@types/body-parser": "^1.19.0",
