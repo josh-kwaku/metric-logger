@@ -15,6 +15,16 @@ npm install
 npm run build && npm start
 ```
 
+For Production Environments
+
+```sh
+git clone https://github.com/Jake-parkers/metric-logger.git
+cd metrics_logger
+npm install
+NODE_ENV=production
+npm run build && npm start
+```
+
 ## Testing
 
 Tests were written with mocha, chai and supertest
