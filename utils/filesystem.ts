@@ -1,8 +1,4 @@
 import fs, { WriteStream } from "fs";
-<<<<<<< HEAD
-import * as readLine from "readline";
-=======
->>>>>>> 3920cf90d1be98e4dd87689c0838c2cbbdbe7b0f
 
 interface ICallback {
   (error: Error, result?: string): void;
@@ -23,7 +19,6 @@ export class FileSystem {
     });
   }
 
-<<<<<<< HEAD
   public splitLines(file_contents: string) {
     return file_contents.split("\n");
   }
@@ -32,13 +27,3 @@ export class FileSystem {
     return fs.createWriteStream(filepath);
   }
 }
-=======
-    public splitLines(file_contents: string) {
-        return file_contents.split("\n");
-    }
-
-    public getWriteStream(filepath: string) : WriteStream {
-        return fs.createWriteStream(filepath);
-    }
-}
->>>>>>> 3920cf90d1be98e4dd87689c0838c2cbbdbe7b0f
