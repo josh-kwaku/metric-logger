@@ -1,5 +1,4 @@
-import * as fs from "fs";
-import * as readLine from "readline";
+import fs, { WriteStream } from "fs";
 
 interface ICallback {
     (error: Error, result?: string) : void
@@ -22,5 +21,9 @@ export class FileSystem {
 
     public splitLines(file_contents: string) {
         return file_contents.split("\n");
+    }
+
+    public getWriteStream(filepath: string) : WriteStream {
+        return fs.createWriteStream(filepath);
     }
 }

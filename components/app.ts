@@ -1,5 +1,4 @@
 import express from "express";
-import cors from "cors";
 import morgan from "morgan";
 import * as rfs from "rotating-file-stream";
 import * as path from "path";
@@ -24,10 +23,6 @@ let logStream = rfs.createStream('requests.log', {
 });
 
 app.use(morgan('combined', {stream: logStream}));
-
-// app.use(cors({
-//     origin: process.env.NODE_ENV === 'development' ? process.env.FRONTEND_LOCAL_URL : process.env.FRONTEND_PRODUCTION_URL
-// }));
 
 app.get('/', (req, res) => {
     res.status(200).send("Metric Logger Application");

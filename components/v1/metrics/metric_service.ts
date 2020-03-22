@@ -31,6 +31,10 @@ class MetricObject {
 export class MetricService {
     constructor() {}
 
+    /**
+     * Saves a new metric in its own file
+     * @param object: IMetric
+     */
     public writeMetricToFile(object: IMetric): Promise<any> {
         return new Promise((resolve, reject) => {
             const date = new Date();
@@ -45,7 +49,7 @@ export class MetricService {
             })
         })
     }
-
+    
     private writeToFile(content: string, key: string): Promise<any> {
         return new Promise((resolve, reject) => {
             let result = fileSystem.writeToFile(pathToMetricFile + `${key}.txt`, content);
@@ -60,20 +64,15 @@ export class MetricService {
         });
     }
 
-    public getMetricByKey(key: string): Promise<any> {
-        return new Promise((resolve, reject) => {
-            this.readMetricFile(key).then(data => {
-                resolve(data);
-            }).catch((error: AppError) => {
-                reject(error);
-            })
-        })
-    }
-
+    /**
+     * Sums all the data for a given metric
+     * @param key: string
+     */
     public sumMetricByKey(key: string) {
         return new Promise((resolve, reject) => {
             this.readMetricFile(key).then((lines: Array<string>) => {
                 const sum = this.sum(lines);
+                this.updateMetricFile(key, lines);
                 resolve(sum);
             }).catch((error: AppError) => {
                 reject(error);
@@ -81,6 +80,10 @@ export class MetricService {
         })
     }
 
+    /**
+     * Sums all the data for a given metric in the past hour
+     * @param lines: Array<string>
+     */
     private sum(lines: Array<string>): number {
         let sum = 0;
         for (let line of lines) {
@@ -94,10 +97,48 @@ export class MetricService {
         return sum
     }
 
+    /**
+     * Updates a metric file with only data that is at most one hour old
+     * @param key 
+     * @param lines 
+     */
+    private updateMetricFile(key: string, lines: Array<string>) {
+        const writer = fileSystem.getWriteStream(pathToMetricFile + `${key}.txt`);
+
+        writer.on('error', (err) => {
+            let error = new AppError(err.message, HttpStatusCode.INTERNAL_SERVER_ERROR, 
+                CommonErrors.SERVER_ERROR, true);
+                errorHandler.handleError(error);
+        });
+
+        writer.on('finish', () => {
+            writer.close();
+        })
+
+        for (let line of lines) {
+            if (line.length <= 0) continue;
+            let metricObject = new MetricObject(line.split("\t"));
+            let today = new Date();
+            if ( this.dateDifferenceInHours(today, new Date(Number(metricObject.timestamp))) <= 1) {
+                writer.write(line + '\n');
+            }
+        }
+        
+    }
+
+    /**
+     * returns the difference in hours between two dates
+     * @param a: Date
+     * @param b: Data
+     */
     private dateDifferenceInHours(a: Date, b: Date) {
         return Math.floor(Math.abs((a.getTime() - b.getTime()) / MS_PER_HOUR));
     }
 
+    /**
+     * Reads a metric file saved in the file system. Format is `${key}.txt`
+     * @param key: string
+     */
     private readMetricFile(key: string): Promise<any> {
         return new Promise((resolve, reject) => {
             fileSystem.readFile(pathToMetricFile + `${key}.txt`, (err, file_contents) => {
