@@ -11,9 +11,6 @@ describe('Metric Logging Service', () => {
                 .then((res) => {
                     expect(res).to.have.status(404);
                 })
-                .catch(error => {
-                    throw error
-                })
         })
 
         it('when a metric value is not supplied, then it should return a 400 bad request', () => {
@@ -21,9 +18,6 @@ describe('Metric Logging Service', () => {
                 .then((res) => {
                     expect(res).to.have.status(400);
                     expect(res.body.success).to.equal(false);
-                })
-                .catch(error => {
-                    throw error
                 })
         })
 
@@ -33,9 +27,6 @@ describe('Metric Logging Service', () => {
                 .then((res) => {
                     expect(res).to.have.status(200);
                     expect(res.body).to.be.empty;
-                })
-                .catch(error => {
-                    throw error
                 })
         })
     });
@@ -49,9 +40,6 @@ describe('Metric Logging Service', () => {
                     expect(res.body.success).to.equal(true);
                     expect(res.body.data.value).to.not.be.null
                     expect(res.body.data.value).to.not.be.below(0)
-                })
-                .catch(error => {
-                    throw error
                 })
         })
 
