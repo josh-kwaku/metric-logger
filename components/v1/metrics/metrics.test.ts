@@ -2,9 +2,35 @@ import chai, { expect } from "chai";
 import chaiHttp from "chai-http";
 import request from "supertest";
 import app from "../../app";
-chai.use(chaiHttp);
+import { MetricService } from "./metric_service";
+import * as assert from "assert";
+import IMetricModel from "./IMetric";
 
-const VALUE = 21;
+chai.use(chaiHttp);
+const metricService = new MetricService();
+
+const metric: IMetricModel = {
+  key: "active_value",
+  value: 21
+};
+
+describe("Metric Service Class", () => {
+  describe("Log new metric", () => {
+    it("should return true when a new metric is successfully logged", () => {
+      assert.equal(metricService.logMetric(metric), true);
+    });
+  });
+
+  describe("Sum metric by key", () => {
+    it("when a valid key is supplied, it should return the correct sum", () => {
+      assert.equal(metricService.sumMetricByKey(metric.key), metric.value);
+    });
+
+    it("when an invalid key is supplied, it should false", () => {
+      assert.equal(metricService.sumMetricByKey("invalid_key"), false);
+    });
+  });
+});
 
 describe("Metric Logging Service", () => {
   describe("Add new metric", () => {
@@ -28,7 +54,7 @@ describe("Metric Logging Service", () => {
     it("when a valid metric value is supplied, then the metric should be saved and it should return a 200 OK", () => {
       return request(app)
         .post("/api/v1/metric/active_value")
-        .send({ value: VALUE })
+        .send({ value: metric.value })
         .then(res => {
           expect(res).to.have.status(200);
           expect(res.body).to.be.empty;
@@ -45,7 +71,7 @@ describe("Metric Logging Service", () => {
           expect(res.body).to.have.keys("data", "success");
           expect(res.body.success).to.equal(true);
           expect(res.body.data.value).to.not.be.null;
-          expect(res.body.data.value).to.equal(VALUE);
+          expect(res.body.data.value).to.equal(metric.value);
         });
     });
 

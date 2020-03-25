@@ -10,9 +10,10 @@ interface Metric {
   [name: string]: Array<MetricProp>;
 }
 
-let metrics: Metric = {}; // holds all of the metrics logged. Cleared once the server is restarted.
+// let metrics: Metric = {}; // holds all of the metrics logged. Cleared once the server is restarted.
 
 export class MetricService {
+  public readonly metrics: Metric = {}; // holds all of the metrics logged. Cleared once the server is restarted.
   constructor() {}
 
   /**
@@ -23,9 +24,9 @@ export class MetricService {
     let timestamp = new Date().getTime();
     let metric: MetricProp = {};
     metric[timestamp] = Math.round(Number(object.value));
-    if (!metrics.hasOwnProperty(object.key)) metrics[object.key] = [metric];
+    if (!this.metrics.hasOwnProperty(object.key)) this.metrics[object.key] = [metric];
     // if the key doesn't at all exist add it to the metrics map
-    else metrics[object.key].push(metric); // update the metric key with the new metric value
+    else this.metrics[object.key].push(metric); // update the metric key with the new metric value
     return true;
   }
 
@@ -35,14 +36,14 @@ export class MetricService {
    */
   public sumMetricByKey(key: string): boolean | number {
     if (!this.metricKeyExists(key)) return false;
-    let sum = this.sum(metrics[key]);
-    this.updateMetricData(key, metrics[key]);
+    let sum = this.sum(this.metrics[key]);
+    this.updateMetricData(key, this.metrics[key]);
 
     return sum;
   }
 
   private metricKeyExists(key: string): boolean {
-    return metrics.hasOwnProperty(key);
+    return this.metrics.hasOwnProperty(key);
   }
 
   private sum(metricValues: Array<MetricProp>): number {
@@ -71,7 +72,7 @@ export class MetricService {
       return this.dateDifferenceInHours(today, new Date(Number(timestamp))) < 1;
     });
 
-    metrics[key] = result;
+    this.metrics[key] = result;
   }
 
   /**
