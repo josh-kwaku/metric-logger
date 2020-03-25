@@ -1,17 +1,6 @@
 import IMetric from "./IMetric";
-import { FileSystem } from "../../../utils/filesystem";
-import * as path from "path";
-import { AppError } from "../../../utils/error";
-import { ErrorHandler } from "../../../utils/error_handler";
-import { HttpStatusCode } from "../../../utils/http_status_codes";
-import { CommonErrors } from "../../../utils/common_errors";
 
-const errorHandler = new ErrorHandler();
-const fileSystem = new FileSystem();
-
-const pathToMetricFile = path.join(process.cwd(), "logs/");
 const MS_PER_HOUR = 36e5;
-// const pathToMetricFile = path.join('/user/lola/metrics.txt');
 
 interface MetricProp {
   [timestamp: string]: number;
@@ -21,7 +10,7 @@ interface Metric {
   [name: string]: Array<MetricProp>;
 }
 
-let metrics: Metric = {};
+let metrics: Metric = {}; // holds all of the metrics logged. Cleared once the server is restarted.
 
 export class MetricService {
   constructor() {}
@@ -88,7 +77,7 @@ export class MetricService {
   /**
    * returns the difference in hours between two dates
    * @param a: Date
-   * @param b: Data
+   * @param b: Date
    */
   private dateDifferenceInHours(a: Date, b: Date) {
     return Math.floor(Math.abs((a.getTime() - b.getTime()) / MS_PER_HOUR));

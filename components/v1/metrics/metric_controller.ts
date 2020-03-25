@@ -2,7 +2,6 @@ import IMetricModel from "./IMetric";
 import { IResponse } from "../../../utils/IResponse";
 import { HttpStatusCode } from "../../../utils/http_status_codes";
 import { CommonErrors } from "../../../utils/common_errors";
-import { AppError } from "../../../utils/error";
 import { MetricService } from "./metric_service";
 import { MetricValidator } from "./metric_validator";
 

@@ -3,7 +3,6 @@ import { NextFunction } from "connect";
 import { ParamsDictionary, Request, Response } from "express-serve-static-core";
 import { MetricController } from "./metric_controller";
 import { IResponse } from "../../../utils/IResponse";
-import { AppError } from "../../../utils/error";
 
 const metricController = new MetricController();
 const router = express.Router();
