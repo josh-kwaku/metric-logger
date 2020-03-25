@@ -13,7 +13,7 @@ interface Metric {
 // let metrics: Metric = {}; // holds all of the metrics logged. Cleared once the server is restarted.
 
 export class MetricService {
-  public readonly metrics: Metric = {}; // holds all of the metrics logged. Cleared once the server is restarted.
+  private metrics: Metric = {}; // holds all of the metrics logged. Cleared once the server is restarted.
   constructor() {}
 
   /**
@@ -24,7 +24,8 @@ export class MetricService {
     let timestamp = new Date().getTime();
     let metric: MetricProp = {};
     metric[timestamp] = Math.round(Number(object.value));
-    if (!this.metrics.hasOwnProperty(object.key)) this.metrics[object.key] = [metric];
+    if (!this.metrics.hasOwnProperty(object.key))
+      this.metrics[object.key] = [metric];
     // if the key doesn't at all exist add it to the metrics map
     else this.metrics[object.key].push(metric); // update the metric key with the new metric value
     return true;
@@ -67,7 +68,7 @@ export class MetricService {
     let today = new Date();
     let metricValuesClone = JSON.parse(JSON.stringify(metricValues));
 
-    let result = metricValuesClone.filter(metricValue => {
+    let result = metricValuesClone.filter((metricValue: MetricProp) => {
       let timestamp = Object.keys(metricValue)[0];
       return this.dateDifferenceInHours(today, new Date(Number(timestamp))) < 1;
     });
