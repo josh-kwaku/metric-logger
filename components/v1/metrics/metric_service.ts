@@ -13,144 +13,76 @@ const pathToMetricFile = path.join(process.cwd(), "logs/");
 const MS_PER_HOUR = 36e5;
 // const pathToMetricFile = path.join('/user/lola/metrics.txt');
 
-class MetricObject {
-  timestamp: number;
-  date: string;
-  time: string;
-  key: string;
-  value: number;
-  constructor(metric_array: Array<string>) {
-    this.timestamp = Number(metric_array[0]);
-    this.date = metric_array[1];
-    this.time = metric_array[2];
-    this.key = metric_array[3].split(":")[1];
-    this.value = Number(metric_array[4].split(":")[1]);
-  }
+interface MetricProp {
+  [timestamp: string]: number;
 }
+
+interface Metric {
+  [name: string]: Array<MetricProp>;
+}
+
+let metrics: Metric = {};
 
 export class MetricService {
   constructor() {}
 
   /**
-   * Saves a new metric in its own file
-   * @param object: IMetric
+   * Adds a metric to the global `metrics` object
+   * @param object
    */
-  public writeMetricToFile(object: IMetric): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const date = new Date();
-      const content = `${date.getTime()}\t${date.getDate()}/${date.getMonth()}/${date.getFullYear()}\t${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}\tkey:${
-        object.key
-      }\tvalue:${object.value}\n`;
-
-      this.writeToFile(content, object.key)
-        .then(contentWasWritten => {
-          if (contentWasWritten) {
-            resolve(true);
-          }
-        })
-        .catch((error: AppError) => {
-          reject(error);
-        });
-    });
-  }
-
-  private writeToFile(content: string, key: string): Promise<any> {
-    return new Promise((resolve, reject) => {
-      let result = fileSystem.writeToFile(
-        pathToMetricFile + `${key}.txt`,
-        content
-      );
-      if (result === true) resolve(result);
-
-      // an error occurred
-      result = result as Error;
-      let error = new AppError(
-        result.message,
-        HttpStatusCode.INTERNAL_SERVER_ERROR,
-        CommonErrors.SERVER_ERROR,
-        true
-      );
-
-      errorHandler.handleError(error);
-      reject(error);
-    });
+  logMetric(object: IMetric) {
+    let timestamp = new Date().getTime();
+    let metric: MetricProp = {};
+    metric[timestamp] = Math.round(Number(object.value));
+    if (!metrics.hasOwnProperty(object.key)) metrics[object.key] = [metric];
+    // if the key doesn't at all exist add it to the metrics map
+    else metrics[object.key].push(metric); // update the metric key with the new metric value
+    return true;
   }
 
   /**
    * Sums all the data for a given metric
    * @param key: string
    */
-  public sumMetricByKey(key: string) {
-    return new Promise((resolve, reject) => {
-      this.readMetricFile(key)
-        .then((lines: Array<string>) => {
-          const sum = this.sum(lines);
-          this.updateMetricFile(key, lines);
-          resolve(sum);
-        })
-        .catch((error: AppError) => {
-          reject(error);
-        });
-    });
+  public sumMetricByKey(key: string): boolean | number {
+    if (!this.metricKeyExists(key)) return false;
+    let sum = this.sum(metrics[key]);
+    this.updateMetricData(key, metrics[key]);
+
+    return sum;
   }
 
-  /**
-   * Sums all the data for a given metric in the past hour
-   * @param lines: Array<string>
-   */
-  private sum(lines: Array<string>): number {
+  private metricKeyExists(key: string): boolean {
+    return metrics.hasOwnProperty(key);
+  }
+
+  private sum(metricValues: Array<MetricProp>): number {
     let sum = 0;
-    for (let line of lines) {
-      if (line.length <= 0) continue;
-      let metricObject = new MetricObject(line.split("\t"));
-      let today = new Date();
-      if (
-        this.dateDifferenceInHours(
-          today,
-          new Date(Number(metricObject.timestamp))
-        ) <= 1
-      ) {
-        sum += Math.round(metricObject.value);
+    let today = new Date();
+    for (const metricValue of metricValues) {
+      let timestamp = Object.keys(metricValue)[0];
+      if (this.dateDifferenceInHours(today, new Date(Number(timestamp))) <= 1) {
+        sum += metricValue[timestamp];
       }
     }
     return sum;
   }
 
   /**
-   * Updates a metric file with only data that is at most one hour old
+   * removes metric data older than 1 hour
    * @param key
    * @param lines
    */
-  private updateMetricFile(key: string, lines: Array<string>) {
-    const writer = fileSystem.getWriteStream(pathToMetricFile + `${key}.txt`);
+  private updateMetricData(key: string, metricValues: Array<MetricProp>): void {
+    let today = new Date();
+    let metricValuesClone = JSON.parse(JSON.stringify(metricValues));
 
-    writer.on("error", err => {
-      let error = new AppError(
-        err.message,
-        HttpStatusCode.INTERNAL_SERVER_ERROR,
-        CommonErrors.SERVER_ERROR,
-        true
-      );
-      errorHandler.handleError(error);
+    let result = metricValuesClone.filter(metricValue => {
+      let timestamp = Object.keys(metricValue)[0];
+      return this.dateDifferenceInHours(today, new Date(Number(timestamp))) < 1;
     });
 
-    writer.on("finish", () => {
-      writer.close();
-    });
-
-    for (let line of lines) {
-      if (line.length <= 0) continue;
-      let metricObject = new MetricObject(line.split("\t"));
-      let today = new Date();
-      if (
-        this.dateDifferenceInHours(
-          today,
-          new Date(Number(metricObject.timestamp))
-        ) <= 1
-      ) {
-        writer.write(line + "\n");
-      }
-    }
+    metrics[key] = result;
   }
 
   /**
@@ -160,30 +92,5 @@ export class MetricService {
    */
   private dateDifferenceInHours(a: Date, b: Date) {
     return Math.floor(Math.abs((a.getTime() - b.getTime()) / MS_PER_HOUR));
-  }
-
-  /**
-   * Reads a metric file saved in the file system. Format is `${key}.txt`
-   * @param key: string
-   */
-  private readMetricFile(key: string): Promise<any> {
-    return new Promise((resolve, reject) => {
-      fileSystem.readFile(
-        pathToMetricFile + `${key}.txt`,
-        (err, file_contents) => {
-          if (err) {
-            let error = new AppError(
-              err.message,
-              HttpStatusCode.BAD_REQUEST,
-              CommonErrors.BAD_PARAMETERS,
-              true
-            );
-
-            errorHandler.handleError(error);
-            reject(error);
-          } else resolve(fileSystem.splitLines(file_contents));
-        }
-      );
-    });
   }
 }
