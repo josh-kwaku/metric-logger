@@ -17,6 +17,11 @@ jobs:
       - run:
           name: "Say hello"
           command: "echo Hello, World!"
+  test-variable:
+    docker:
+      - image: cimg/base:stable
+      steps:
+        - run: echo $PRACTICE_VARIABLE
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/configuration-reference/#workflows
@@ -24,3 +29,5 @@ workflows:
   say-hello-workflow:
     jobs:
       - say-hello
+    context:
+      - practice_context
