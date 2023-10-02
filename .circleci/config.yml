@@ -29,5 +29,5 @@ workflows:
   say-hello-workflow:
     jobs:
       - say-hello
-    context:
-      - practice_context
+      context:
+        - practice_context
