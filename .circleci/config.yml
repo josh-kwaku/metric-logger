@@ -28,6 +28,6 @@ jobs:
 workflows:
   say-hello-workflow:
     jobs:
-      - say-hello
-      context:
-        - practice_context
+      - say-hello:
+        context:
+          - practice_context
